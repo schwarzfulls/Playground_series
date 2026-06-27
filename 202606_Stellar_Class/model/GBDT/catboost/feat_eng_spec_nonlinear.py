@@ -17,35 +17,32 @@
 base model + 特徴量エンジニアリング(波長マイナス, )
 
 結果
-予測精度: スコア：0.94625
+予測精度: スコア：0.94580
 
 特徴量重要度
               feature  importance
-7            redshift   40.636394
-11                g_r   10.721306
-6                   z    8.125768
-0               alpha    7.519934
-12                r_i    6.166190
-10                u_g    5.669823
-1               delta    5.592495
-2                   u    3.792865
-3                   g    3.531858
-5                   i    2.708037
-13                i_z    2.455234
-4                   r    1.724148
-8       spectral_type    0.764032
-9   galaxy_population    0.591914
+14       log_redshift   21.258079
+7            redshift   19.539293
+11                g_r   11.005939
+6                   z    7.911822
+0               alpha    7.442846
+12                r_i    6.344433
+10                u_g    5.634059
+1               delta    5.310524
+2                   u    3.627072
+3                   g    3.565688
+13                i_z    2.564434
+5                   i    2.446683
+4                   r    2.015646
+9   galaxy_population    0.754204
+8       spectral_type    0.579278
 
 分かったこと
-- g_r / r_i / u_g が予測精度への効果が高い．
-- 反対に，カテゴリカルデータ(spectral_type/galaxy_population) は予測精度への重要度が小さい．
-- 予測精度は，redshift と色により大体決まる．
-  - 地球からの距離で大体決まって，スペクトルで微調整して予測しているイメージ
+- log_redshift と redshift の合計値は，元の redshift とほぼ同じなので表現方法が変わっただけ
+- log_redshift と redshift が分業して予測精度に寄与している
 
 次回やること
-  - redshift の非線形化
-    - redshift の対数化
-    - 波長の組み合わせよりも重要度が高い
+  - redshift をさらに分業させる
 
 """
 
