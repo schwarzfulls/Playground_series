@@ -11,6 +11,15 @@
 # ]
 # ///
 
+"""
+目的
+base model の予測精度の確認
+base model なので最低限の設定のみを行う
+
+結果
+スコア：0.94239
+"""
+
 from pathlib import Path
 
 import pandas as pd
