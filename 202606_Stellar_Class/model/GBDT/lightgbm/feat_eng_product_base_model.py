@@ -14,41 +14,41 @@
 
 """
 目的
-base model(LightGBM) + 特徴量エンジニアリング(波長マイナス, redshift*スペクトルの差分) + カテゴリカルデータの削除 + alpha * delta + 波長の比率
+base model(LightGBM) + 特徴量エンジニアリング(波長マイナス, redshift*スペクトルの差分) + カテゴリカルデータの削除 + alpha * delta + 波長の積
 
-結果Score: 0.95339
+結果Score: 0.95367
 
 特徴量重要度
-         feature  importance
-0          alpha        5723
-7       redshift        4579
-1          delta        4519
-16   alpha_delta        3001
-6              z        2859
-2              u        2526
-3              g        2364
-4              r        1841
-5              i        1785
-13  redshift_g_r        1728
-18     g_r_ratio        1538
-19     r_i_ratio        1523
-8            u_g        1367
-14  redshift_r_i        1362
-17     u_g_ratio        1288
-20     i_z_ratio        1264
-12  redshift_u_g        1239
-15  redshift_i_z        1232
-10           r_i        1192
-9            g_r        1141
-11           i_z         926
+           feature  importance
+0            alpha        5283
+1            delta        4163
+7         redshift        3936
+6                z        3016
+16     alpha_delta        2772
+2                u        2440
+10             r_i        2371
+3                g        2329
+8              u_g        1970
+9              g_r        1890
+11             i_z        1775
+4                r        1750
+5                i        1597
+13    redshift_g_r        1565
+20       delta_g_r        1319
+15    redshift_i_z        1196
+14    redshift_r_i        1179
+12    redshift_u_g        1150
+17  alpha_redshift        1145
+19       alpha_u_g        1097
+18  delta_redshift        1057
 
 分かったこと
-- 今までの特徴量エンジニアリングも考慮すると非線形の特徴量の追加よりも，特徴量同士の相互関係の方がスコアに効く
-  - 波長の比率は効果がない
+- 追加しない方が良い
+- feat_eng_alpha_delta_base_model.py の特徴量を base model にする．
 
 次回やること
-- alpha と delta の特徴量の組み合わせを増やしてみる
-  - alpha * redshift, delta * redshift, alpha * u_g, delta * g_r
+- モデルのハイパラ調整
+  - cv 5-fold も行う
 """
 
 from pathlib import Path
@@ -158,17 +158,17 @@ def feat_eng_alpha_delta(
     return calc_df_list[0], calc_df_list[1]
 
 
-def feat_eng_ratio(
+def feat_eng_product(
     train_pl_df: pl.DataFrame, test_pl_df: pl.DataFrame
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
-    """波長の比率を新しい特徴量として追加する関数
+    """redshift とそれ以外の要素の積を新しい特徴量として追加する関数
 
     Args:
         train_pl_df (pl.DataFrame): train data
         test_pl_df (pl.DataFrame): test data
 
     Returns:
-        tuple[pl.DataFrame, pl.DataFrame]: 波長の比率を追加した train, test データ
+        tuple[pl.DataFrame, pl.DataFrame]: redshift とそれ以外の要素の積を追加した train, test データ
     """
     df_list = [train_pl_df, test_pl_df]
     calc_df_list = []
@@ -176,10 +176,10 @@ def feat_eng_ratio(
         calc_df_list.append(
             df.with_columns(
                 [
-                    (pl.col("u") / pl.col("g")).alias("u_g_ratio"),
-                    (pl.col("g") / pl.col("r")).alias("g_r_ratio"),
-                    (pl.col("r") / pl.col("i")).alias("r_i_ratio"),
-                    (pl.col("i") / pl.col("z")).alias("i_z_ratio"),
+                    (pl.col("alpha") * pl.col("redshift")).alias("alpha_redshift"),
+                    (pl.col("delta") * pl.col("redshift")).alias("delta_redshift"),
+                    (pl.col("alpha") * pl.col("u_g")).alias("alpha_u_g"),
+                    (pl.col("delta") * pl.col("g_r")).alias("delta_g_r"),
                 ]
             )
         )
@@ -307,7 +307,7 @@ def main() -> None:
     train_pl_df, test_pl_df = feat_eng_spectrum(train_pl_df, test_pl_df)
     train_pl_df, test_pl_df = feat_eng_spectrum_redshift(train_pl_df, test_pl_df)
     train_pl_df, test_pl_df = feat_eng_alpha_delta(train_pl_df, test_pl_df)
-    train_pl_df, test_pl_df = feat_eng_ratio(train_pl_df, test_pl_df)
+    train_pl_df, test_pl_df = feat_eng_product(train_pl_df, test_pl_df)
 
     # 学習データ(classなし), class データ, test データの分割する
     x_train_pd, target_train_pd, test_pd_df = preprocess_data(train_pl_df, test_pl_df)
