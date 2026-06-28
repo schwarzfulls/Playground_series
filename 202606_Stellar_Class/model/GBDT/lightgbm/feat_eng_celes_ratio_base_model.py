@@ -16,31 +16,31 @@
 目的
 base model(LightGBM) + 特徴量エンジニアリング(波長マイナス, redshift*スペクトルの差分) + カテゴリカルデータの削除 + alpha * delta + 波長の比率
 
-結果Score: 0.95485
+結果Score: 0.95339
 
 特徴量重要度
          feature  importance
-0          alpha        6151
-1          delta        4943
-7       redshift        4044
-16   alpha_delta        3093
-2              u        2488
-9            g_r        2464
-6              z        2385
-10           r_i        2335
-11           i_z        1804
-3              g        1715
-13  redshift_g_r        1591
-8            u_g        1394
-15  redshift_i_z        1305
-20     i_z_ratio        1299
-12  redshift_u_g        1269
-14  redshift_r_i        1265
-17     u_g_ratio        1265
-18     g_r_ratio        1179
-4              r        1049
-5              i        1018
-19     r_i_ratio         944
+0          alpha        5723
+7       redshift        4579
+1          delta        4519
+16   alpha_delta        3001
+6              z        2859
+2              u        2526
+3              g        2364
+4              r        1841
+5              i        1785
+13  redshift_g_r        1728
+18     g_r_ratio        1538
+19     r_i_ratio        1523
+8            u_g        1367
+14  redshift_r_i        1362
+17     u_g_ratio        1288
+20     i_z_ratio        1264
+12  redshift_u_g        1239
+15  redshift_i_z        1232
+10           r_i        1192
+9            g_r        1141
+11           i_z         926
 
 分かったこと
 - 今までの特徴量エンジニアリングも考慮すると非線形の特徴量の追加よりも，特徴量同士の相互関係の方がスコアに効く
@@ -177,9 +177,9 @@ def feat_eng_ratio(
             df.with_columns(
                 [
                     (pl.col("u") / pl.col("g")).alias("u_g_ratio"),
-                    (pl.col("g") * pl.col("r")).alias("g_r_ratio"),
-                    (pl.col("r") * pl.col("i")).alias("r_i_ratio"),
-                    (pl.col("i") * pl.col("z")).alias("i_z_ratio"),
+                    (pl.col("g") / pl.col("r")).alias("g_r_ratio"),
+                    (pl.col("r") / pl.col("i")).alias("r_i_ratio"),
+                    (pl.col("i") / pl.col("z")).alias("i_z_ratio"),
                 ]
             )
         )
